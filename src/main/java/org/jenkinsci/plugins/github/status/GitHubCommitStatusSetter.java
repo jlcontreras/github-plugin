@@ -143,6 +143,13 @@ public class GitHubCommitStatusSetter extends Notifier implements SimpleBuildSte
             String message = result.getMsg();
             GHCommitState state = result.getState();
 
+            // Retry mechanism in case there were problems retrieving repos from GitHub
+            int mtries = 3;
+            while(repos.isEmpty() && mtries > 0){
+                repos = getReposSource().repos(run, listener);
+                mtries--;
+            }
+
             listener.getLogger().printf(
                     "[%s] %s on repos %s (sha:%7.7s) with context:%s%n",
                     getDescriptor().getDisplayName(),
